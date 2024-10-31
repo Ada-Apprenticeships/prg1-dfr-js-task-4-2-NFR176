@@ -1,123 +1,164 @@
 const fs = require("fs");
 
 function fileExists(filename) {
-  return fs.existsSync(filename);
+	return fs.existsSync(filename);
 }
 
 function validNumber(value) {
-
+	{
+		const number = parseFloat(value); // parseFloat is used to check if value can be converted into a finite number
+		const isValidFormat = /^-?\d+(\.\d+)?$/.test(value); // Regex Check: '^-?\d+(\.\d+)?$' ensures the input has an optional - sign, followed by digits, with an optional decimal portion.
+		return isValidFormat && !isNaN(number) && isFinite(number);
+	}
 }
-  
+
 function dataDimensions(dataframe) {
-  const rows=dataframe.length;
-  const columns = dataframe[0] ? Object.keys(dataframe[0]).length :0;
-
-  return [rows,columns];
+	if (dataframe === undefined || dataframe === "" || dataframe.length === 0) {
+		return [-1, -1];
+	}
+	const rows = dataframe.length;
+	const cols = Array.isArray(dataframe[0]) ? dataframe[0].length : -1;
+	return [rows, cols];
 }
-
-const salesData =  [
-
-
-];
-
 
 function findTotal(dataset) {
-  if (Array.isArray(dataset) && dataset.every(Array.isArray)) {
-    return 0; // Return 0 for 2D arrays
-  }
-
-  // Use reduce to sum up numeric values, ignoring non-numeric values
-  return dataset.reduce((total, value) => {
-    // Check if the value is a number
-    return total + (isNaN(value) ? 0 : Number(value));
-  }, 0);
+	// Check if dataset is not a 1D array or is empty
+    if (dataDimensions(dataset)[1] !== -1 || dataset.length === 0) {
+        return 0; 
+    }
+    
+    let total = 0;
+    for (let i = 0; i < dataset.length; i++) {
+        if (validNumber(dataset[i])) {
+            total += parseFloat(dataset[i]); // Accumulate total for valid numbers
+        }
+    }
+    return total;
 }
 
 
 
 
 function calculateMean(dataset) {
-  if (!Array.isArray(dataset)) return 0;
+    if (!Array.isArray(dataset) || dataset.length === 0) {
+        console.error("Dataset is not an array or is empty.");
+        return false;
+    }
 
-  const validNumbers=dataset
-  .flat()
- .map(item => Number(item))
- .filter(item => !isNaN(item))
+    const validNumbers = dataset.filter(value => typeof value === 'number' && !isNaN(value));
+    if (validNumbers.length === 0) {
+        console.error("No valid numbers found in dataset.");
+        return false;
+    }
 
- const sum=validNumbers.reduce((acc, curr) => acc +curr, 0);
-  
- return validNumbers.length > 0 ? sum / validNumbers.length : 0;
+    const sum = validNumbers.reduce((acc, num) => acc + num, 0);
+    return sum / validNumbers.length;
 }
 
+
+
 function calculateMedian(dataset) {
-   
-    const numericData = dataset.filter(value => !isNaN(value)).map(Number);
-  
-    if (numericData.length === 0) {
-      return null; 
-    }
-    
-   numericData.sort((a, b) => a - b);
-    
-    const middleIndex = Math.floor(numericData.length / 2);
-  
-    
-    if (numericData.length % 2 === 0) {
-   
-      return (numericData[middleIndex - 1] + numericData[middleIndex]) / 2;
-    } else {
-     
-      return numericData[middleIndex];
-    }
-  }
-  
-
-
-  
-
-
-
-
-
+	if (dataDimensions(dataset)[1] !== -1 || dataset.length === 0) {
+		return 0;
+	}
+	const validNumbers = dataset.filter(validNumber).map(Number).sort((a, b) => a - b);
+	const mid = Math.floor(validNumbers.length / 2);
+	return validNumbers.length % 2 === 0
+		? (validNumbers[mid - 1] + validNumbers[mid]) / 2
+		: validNumbers[mid];
+}
 
 function convertToNumber(dataframe, col) {
+	let count = 0;
+	
+	if (dataframe === undefined || dataframe.length === 0) {
+		return 0;
+	}
 
+	for (let i = 0; i < dataframe.length; i++) {
+		
+		if (dataframe[i][col] !== undefined && validNumber(dataframe[i][col])) {
+			dataframe[i][col] = parseFloat(dataframe[i][col]);
+			count++;
+		}
+	}
+	return count;
 }
 
 function flatten(dataframe) {
-
-const dataset = dataframe.map(row => Object.values(row)[0]);
-return dataset; 
-
+	const dataset = dataframe.map((row) => Object.values(row)[0]);
+	return dataset;
 }
 const dataframe = [
-  { value: 1500 },
-  { value: 1750 },
-  { value: 1800 },
-  { value: 2000 }
+	{ value: 1500 },
+	{ value: 1750 },
+	{ value: 1800 },
+	{ value: 2000 },
 ];
 const dataset = flatten(dataframe);
 console.log(dataset);
 
 
-function loadCSV(csvFile, ignoreRows, ignoreCols) {
+function loadCSV(csvFile, ignoreRows=[], ignoreCols=[]) {
+	if (!fileExists(csvFile)) {
+        return [[], -1, -1];
+    }
 
+    const data = fs.readFileSync(csvFile, 'utf-8')
+        .trim() // Remove any trailing newline
+        .split('\n')
+        .map(row => row.split(','));
+
+    if (data.length === 0) {
+        return [[], 0, 0];
+    }
+
+    const totalRows = data.length;
+    const totalCols = data[0].length;
+
+    const dataframe = data
+        .filter((_, rowIndex) => !ignoreRows.includes(rowIndex))
+        .map(row => row.filter((_, colIndex) => !ignoreCols.includes(colIndex)));
+
+    return [dataframe, totalRows, totalCols];
 }
-
 
 function createSlice(dataframe, columnIndex, pattern, exportColumns = []) {
+	if (!Array.isArray(dataframe) || dataframe.length === 0 || columnIndex < 0) {
+		return [];
+	}
+	const result =[];
+	
+	  for (const row of dataframe) {
+		if (!Array.isArray(row) || row.length <= columnIndex) continue;
+	
+      const cellValue = row[columnIndex];
+       
+	 const matchesPattern= (pattern === '*' || String(cellValue) === String(pattern));
 
-}
+		if (matchesPattern) { 
+			const outputRow = exportColumns.length > 0 
+			  ? exportColumns.map(colIndex => (row[colIndex] !== undefined ? row[colIndex] : null))
+			  : row;
+		  
+			result.push(outputRow);
+		  } 
+		}  
+
+		return result;
+	}
+		
+			
 
 module.exports = {
-  fileExists,
-  validNumber,
-  dataDimensions,
-  calculateMean,
-  findTotal,
-  convertToNumber,
-  flatten,
-  loadCSV,
-  calculateMedian,
-  createSlice,
-}
+	fileExists,
+	validNumber,
+	dataDimensions,
+	calculateMean,
+	findTotal,
+	convertToNumber,
+	flatten,
+	loadCSV,
+	calculateMedian,
+	createSlice,
+};

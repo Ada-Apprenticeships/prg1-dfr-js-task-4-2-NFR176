@@ -23,39 +23,37 @@ describe("DataFrame Project Tests", () => {
     });
   });
 
-  function validNumber(value) {
-    const validnumber = parseFloat(value);
-    const isValidFormat = /^-?\d+(\.\d+) ?$/.test(value);
-    return isValidFormat  && !isNaN(number) && isFinite(number);
-
-   console.log(validNumber ('0,0')); //false
-   console.log(validNumber ('1.5')); //true
-   console.log(validNumber ('-1.12')); //true
-   console.log(validNumber ('-5')); //true
-   console.log(validNumber ('5')); //true
-   console.log(validNumber (1.3));//true
-   console.log(validNumber ('1'));//true
-   console.log(validNumber ('5')); //true
-   console.log(validNumber ( '+5')); //false
-   console.log(validNumber ('.')); //false
-   console.log(validnumber ('0.0.2')); //false
+    describe("validNumber", () => {
+      test("should identify valid numbers", () => {
+        const validCases = [
+          0,
+          1.5,
+          -1.12,
+          100,
+          -100,
+          "1.5",
+          "-1.12",
+          "100",
+        ];
+        validCases.forEach((number) => expect(validNumber(number)).toBe(true));
+      });
   
-
-    test("handles invalid number formats and special characters", () => {
-      const invalidCases = [
-        "+1.5",
-        "5.",
-        "1.2.3",
-        "ABC",
-        "12ABC",
-        "",
-        ".",
-        "-",
-        "+-1.1",
-      ];
-      invalidCases.forEach((number) => expect(validNumber(number)).toBe(false));
+      test("handles invalid number formats and special characters", () => {
+        const invalidCases = [
+          "+1.5",
+          "5.",
+          "1.2.3",
+          "ABC",
+          "12ABC",
+          "",
+          ".",
+          "-",
+          "+-1.1",
+        ];
+        invalidCases.forEach((number) => expect(validNumber(number)).toBe(false));
+      });
     });
-  };
+   
 
   describe("dataDimensions", () => {
     test("should return correct dimensions for 2D array", () => {
