@@ -6,8 +6,7 @@ function fileExists(filename) {
 
 function validNumber(value) {
 	{
-		const number = parseFloat(value); // parseFloat is used to check if value can be converted into a finite number
-		const isValidFormat = /^-?\d+(\.\d+)?$/.test(value); // Regex Check: '^-?\d+(\.\d+)?$' ensures the input has an optional - sign, followed by digits, with an optional decimal portion.
+		const number = parseFloat(value); 
 		return isValidFormat && !isNaN(number) && isFinite(number);
 	}
 }
@@ -30,7 +29,7 @@ function findTotal(dataset) {
     let total = 0;
     for (let i = 0; i < dataset.length; i++) {
         if (validNumber(dataset[i])) {
-            total += parseFloat(dataset[i]); // Accumulate total for valid numbers
+            total += parseFloat(dataset[i]); 
         }
     }
     return total;
@@ -40,22 +39,19 @@ function findTotal(dataset) {
 
 
 function calculateMean(dataset) {
-    if (!Array.isArray(dataset) || dataset.length === 0) {
-        console.error("Dataset is not an array or is empty.");
-        return false;
-    }
-
-    const validNumbers = dataset.filter(value => typeof value === 'number' && !isNaN(value));
-    if (validNumbers.length === 0) {
-        console.error("No valid numbers found in dataset.");
-        return false;
-    }
-
-    const sum = validNumbers.reduce((acc, num) => acc + num, 0);
-    return sum / validNumbers.length;
+	if (dataDimensions(dataset)[1] !==-1 || dataset.length ===0) {
+		return 0;
+	}
+	let sum = 0;
+	let count = 0;
+	for (let i =0; i<dataset.length; i++) {
+       if (validNumber(dataset[i])) {
+		sum += parseFloat(dataset[i]);
+		count ++;
+	   }
+	}
+	return count >0 ? sum/count :0;
 }
-
-
 
 function calculateMedian(dataset) {
 	if (dataDimensions(dataset)[1] !== -1 || dataset.length === 0) {
