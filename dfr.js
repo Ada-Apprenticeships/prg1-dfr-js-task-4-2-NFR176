@@ -5,18 +5,27 @@ function fileExists(filename) {
 }
 
 function validNumber(value) {
-	{
-		const number = parseFloat(value); 
-		return isValidFormat && !isNaN(number) && isFinite(number);
-	}
-}
+	
+		{ 
+			// value can be string or numeric // returns a boolean 
+		const number = parseFloat(value); // parseFloat is used to check if value can be converted into a finite number
+		const isregexCheck = /^-?\d+(\.\d+)?$/.test(value); // Regex Check: '^-?\d+(\.\d+)?$' ensures the input has an optional - sign, followed by digits, with an optional decimal portion.
+		return isregexCheck && !isNaN(number) && isFinite(number);
+		
+		} };
+	  
+
+	  
+  
+
+
 
 function dataDimensions(dataframe) {
 	if (dataframe === undefined || dataframe === "" || dataframe.length === 0) {
 		return [-1, -1];
 	}
-	const rows = dataframe.length;
-	const cols = Array.isArray(dataframe[0]) ? dataframe[0].length : -1;
+    const rows = dataframe.length;
+    const cols = Array.isArray(dataframe[0]) ? dataframe[0].length : -1;
 	return [rows, cols];
 }
 
@@ -34,8 +43,6 @@ function findTotal(dataset) {
     }
     return total;
 }
-
-
 
 
 function calculateMean(dataset) {
@@ -67,7 +74,7 @@ function calculateMedian(dataset) {
 function convertToNumber(dataframe, col) {
 	let count = 0;
 	
-	if (dataframe === undefined || dataframe.length === 0) {
+    if (dataframe === undefined || dataframe.length === 0) {
 		return 0;
 	}
 
@@ -85,7 +92,7 @@ function flatten(dataframe) {
 	const dataset = dataframe.map((row) => Object.values(row)[0]);
 	return dataset;
 }
-const dataframe = [
+ const dataframe = [
 	{ value: 1500 },
 	{ value: 1750 },
 	{ value: 1800 },
@@ -123,17 +130,17 @@ function createSlice(dataframe, columnIndex, pattern, exportColumns = []) {
 	if (!Array.isArray(dataframe) || dataframe.length === 0 || columnIndex < 0) {
 		return [];
 	}
-	const result =[];
+    const result =[];
 	
 	  for (const row of dataframe) {
-		if (!Array.isArray(row) || row.length <= columnIndex) continue;
+	  if (!Array.isArray(row) || row.length <= columnIndex) continue;
 	
-      const cellValue = row[columnIndex];
+    const cellValue = row[columnIndex];
        
-	 const matchesPattern= (pattern === '*' || String(cellValue) === String(pattern));
+ const matchesPattern= (pattern === '*' || String(cellValue) === String(pattern));
 
 		if (matchesPattern) { 
-			const outputRow = exportColumns.length > 0 
+		 const outputRow = exportColumns.length > 0 
 			  ? exportColumns.map(colIndex => (row[colIndex] !== undefined ? row[colIndex] : null))
 			  : row;
 		  
